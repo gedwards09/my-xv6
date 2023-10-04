@@ -1,0 +1,3 @@
+ld: proc.o: in function `scheduler':
+/home/gredwards/C/537/ostep-projects/scheduling-xv6-lottery/src/proc.c:373: undefined reference to `rand0'
+make: *** [Makefile:145: kernel] Error 1

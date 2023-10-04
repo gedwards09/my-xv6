@@ -1,0 +1,3 @@
+ld: lottery.o: in function `main':
+/home/gredwards/C/537/ostep-projects/scheduling-xv6-lottery/src/lottery.c:74: undefined reference to `yield'
+make: *** [Makefile:172: _lottery] Error 1
