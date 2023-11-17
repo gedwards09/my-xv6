@@ -1,3 +1,8 @@
+/*
+ * Revisions:
+ *   GJE p3b - add clearptew
+ *           - add permitptew
+ */
 #include "param.h"
 #include "types.h"
 #include "defs.h"
@@ -309,6 +314,49 @@ clearpteu(pde_t *pgdir, char *uva)
     panic("clearpteu");
   *pte &= ~PTE_U;
 }
+
+/*
+ * Clear PTE_W write privileges from a page.
+ * Parameters:
+ *   pgdir (IN) - pointer to page directory
+ *   uva   (in) - pointer to user virtual address page
+ * Revisions:
+ *   GJE p3b - Created
+ */
+void clearptew(pde_t* pgdir, char* uva)
+{
+	pte_t* pte;
+	pte = walkpgdir(pgdir, uva, 0);
+	if (pte == 0)
+	{
+		panic("clearptew");
+	}
+	*pte &= ~PTE_W;
+	// update page tabe base to register changes
+	lcr3(V2P(pgdir));
+}
+
+/*
+ * Give PTE_W write privileges to a page.
+ * Parameters:
+ *   pgdir (IN) - pointer to page directory
+ *   uva   (in) - pointer to user virtual address page
+ * Revisions:
+ *   GJE p3b - Created
+ */
+void permitptew(pde_t* pgdir, char* uva)
+{
+	pte_t* pte;
+	pte = walkpgdir(pgdir, uva, 0);
+	if (pte == 0)
+	{
+		panic("permitptew");
+	}
+	*pte |= PTE_W;
+	// update page tabe base to register changes
+	lcr3(V2P(pgdir));
+}
+
 
 // Given a parent process's page table, create a copy
 // of it for a child.

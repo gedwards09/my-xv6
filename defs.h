@@ -1,6 +1,8 @@
 /*
- * @revisions
+ * Revisions
  *   GJE p2b - add lottery scheduler function declarations
+ *   GJE p3b - add clearptew declaration
+ *           - add permitptew declaration
  */
 
 struct buf;
@@ -194,6 +196,8 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+void            clearptew(pde_t *pgdir, char *uva);
+void            permitptew(pde_t *pgdir, char *uva);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

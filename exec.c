@@ -1,3 +1,8 @@
+/*
+ * Revisions:
+ *   GJE p3b - add protected page to user virtual address space
+ */ 
+
 #include "types.h"
 #include "param.h"
 #include "memlayout.h"
@@ -7,6 +12,12 @@
 #include "x86.h"
 #include "elf.h"
 
+#define NULL ((void*)0)
+
+/*
+ * Revisions:
+ *   GJE p3b - add protected page to user virtual address space
+ */
 int
 exec(char *path, char **argv)
 {
@@ -38,8 +49,16 @@ exec(char *path, char **argv)
   if((pgdir = setupkvm()) == 0)
     goto bad;
 
-  // Load program into memory.
+  // Allocate one inaccessible page at address 0
   sz = 0;
+  if ((sz = allocuvm(pgdir, sz, sz + PGSIZE)) == 0)
+  {
+	goto bad;
+  }
+  clearpteu(pgdir, NULL);
+
+
+  // Load program into memory.
   for(i=0, off=elf.phoff; i<elf.phnum; i++, off+=sizeof(ph)){
     if(readi(ip, (char*)&ph, off, sizeof(ph)) != sizeof(ph))
       goto bad;

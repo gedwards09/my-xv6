@@ -1,8 +1,11 @@
 /*
  * @revisions
  *   GJE p1b - add getppid syscall
- *   GJE p1b - add getreadcount syscall
- *   GJE p2b - add settickets and getpinfo syscalls
+ *           - add getreadcount syscall
+ *   GJE p2b - add settickets syscall
+ *           - add getpinfo syscall
+ *   GJE p3b - add mprotect syscall
+ *           - add munprotect syscall
  */
 
 #include "types.h"
@@ -116,34 +119,38 @@ extern int sys_getreadcount(void);
 extern int sys_settickets(void);
 extern int sys_getpinfo(void);
 extern int sys_yield(void);
+extern int sys_mprotect(void);
+extern int sys_munprotect(void);
 
 static int (*syscalls[])(void) = {
-[SYS_fork]    sys_fork,
-[SYS_exit]    sys_exit,
-[SYS_wait]    sys_wait,
-[SYS_pipe]    sys_pipe,
-[SYS_read]    sys_read,
-[SYS_kill]    sys_kill,
-[SYS_exec]    sys_exec,
-[SYS_fstat]   sys_fstat,
-[SYS_chdir]   sys_chdir,
-[SYS_dup]     sys_dup,
-[SYS_getpid]  sys_getpid,
-[SYS_sbrk]    sys_sbrk,
-[SYS_sleep]   sys_sleep,
-[SYS_uptime]  sys_uptime,
-[SYS_open]    sys_open,
-[SYS_write]   sys_write,
-[SYS_mknod]   sys_mknod,
-[SYS_unlink]  sys_unlink,
-[SYS_link]    sys_link,
-[SYS_mkdir]   sys_mkdir,
-[SYS_close]   sys_close,
-[SYS_getppid] sys_getppid,
+[SYS_fork]         sys_fork,
+[SYS_exit]         sys_exit,
+[SYS_wait]         sys_wait,
+[SYS_pipe]         sys_pipe,
+[SYS_read]         sys_read,
+[SYS_kill]         sys_kill,
+[SYS_exec]         sys_exec,
+[SYS_fstat]        sys_fstat,
+[SYS_chdir]        sys_chdir,
+[SYS_dup]          sys_dup,
+[SYS_getpid]       sys_getpid,
+[SYS_sbrk]         sys_sbrk,
+[SYS_sleep]        sys_sleep,
+[SYS_uptime]       sys_uptime,
+[SYS_open]         sys_open,
+[SYS_write]        sys_write,
+[SYS_mknod]        sys_mknod,
+[SYS_unlink]       sys_unlink,
+[SYS_link]         sys_link,
+[SYS_mkdir]        sys_mkdir,
+[SYS_close]        sys_close,
+[SYS_getppid]      sys_getppid,
 [SYS_getreadcount] sys_getreadcount,
 [SYS_settickets]   sys_settickets,
 [SYS_getpinfo]     sys_getpinfo,
-[SYS_yield]        sys_yield
+[SYS_yield]        sys_yield,
+[SYS_mprotect]     sys_mprotect,
+[SYS_munprotect]   sys_munprotect
 };
 
 void

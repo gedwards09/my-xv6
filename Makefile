@@ -3,22 +3,25 @@ UPROGS=\
 	_echo\
 	_forktest\
 	_grep\
-	_hello\
 	_init\
 	_kill\
 	_ln\
-	_lottery\
 	_ls\
 	_mkdir\
 	_ps\
 	_rm\
 	_sh\
-	_spin\
 	_stressfs\
-	_testppid\
 	_usertests\
 	_wc\
 	_zombie\
+	_test_fork\
+	_test_null\
+	_test_pid\
+	_test_ppid\
+	_user_hello\
+	_user_lottery\
+	_user_spin\
 
 OBJS = \
 	bio.o\
@@ -105,6 +108,7 @@ ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
+
 # Disable PIE when possible (for Ubuntu 16.10 toolchain)
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
 CFLAGS += -fno-pie -no-pie
@@ -166,10 +170,12 @@ tags: $(OBJS) entryother.S _init
 vectors.S: vectors.pl
 	./vectors.pl > vectors.S
 
+ULDFLAGS += -nostdlib --omagic --entry=main --section-start=.text=0x1000
+
 ULIB = ulib.o usys.o printf.o umalloc.o rand.o
 
 _%: %.o $(ULIB)
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o $@ $^
+	$(LD) $(LDFLAGS) $(ULDFLAGS) -N -e main -Ttext 0x1000 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
 

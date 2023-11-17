@@ -1,8 +1,12 @@
 /*
  * @revisions
  *   GJE p1b - add getppid syscall
- *   GJE p1b - add getreadcount syscall
+ *           - add getreadcount syscall
  *   GJE p2b - add settickets syscall
+ *           - add getpinfo syscall
+ *           - add yield syscall
+ *   GJE p3b - add mprotect syscall
+ *           - add munprotect syscall
  */
 
 #include "syscall.h"
@@ -41,3 +45,5 @@ SYSCALL(getreadcount)
 SYSCALL(settickets)
 SYSCALL(getpinfo)
 SYSCALL(yield)
+SYSCALL(mprotect)
+SYSCALL(munprotect)

@@ -1,9 +1,10 @@
 /*
  * Revisions:
  * GJE p1b - add getppid system call
- * GJE p1b - add getreadcount system call
+ *         - add getreadcount system call
  * GJE p2b - add getpinfo and settickets system calls
- * GJE p2b - add yield syscall
+ *         - add yield syscall
+ * GJE p3b - add mprotect and munprotect system calls
  */
 
 struct stat;
@@ -37,6 +38,8 @@ int getreadcount(void);
 int settickets(int);
 int getpinfo(struct pstat*);
 int yield(void);
+int mprotect(void*, int);
+int munprotect(void*, int);
 
 // ulib.c
 int stat(const char*, struct stat*);
