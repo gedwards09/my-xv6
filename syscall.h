@@ -4,9 +4,10 @@
  *   GJE p1b - add SYS_getppid definition
  *           - add SYS_getreadcount definition
  *   GJE p2b - add SYS_settickets
-             - add SYS_getpinfo
+ *           - add SYS_getpinfo
  *   GJE p3b - add SYS_mprotect
-             - add SYS_munprotect
+ *           - add SYS_munprotect
+ *   GJE p4b - add SYS_clone
  */
 
 #define SYS_fork          1
@@ -37,3 +38,4 @@
 #define SYS_yield        26
 #define SYS_mprotect     27
 #define SYS_munprotect   28
+#define SYS_clone		 29

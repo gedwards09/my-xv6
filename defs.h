@@ -1,8 +1,9 @@
 /*
  * Revisions
- *   GJE p2b - add lottery scheduler function declarations
- *   GJE p3b - add clearptew declaration
- *           - add permitptew declaration
+ *   GJE p2b - add lottery scheduler function
+ *   GJE p3b - add clearptew
+ *           - add permitptew
+ *   GJE p4b - add clone
  */
 
 struct buf;
@@ -114,6 +115,8 @@ int             pipewrite(struct pipe*, char*, int);
 int             cpuid(void);
 void            exit(void);
 int             fork(void);
+int				clone(void (*fcn)(void*, void*), void* arg1, 
+					  void* arg2, void* stack); // p4b - kernel threads
 struct proc*    getLotteryWinner(void);
 int             getpinfo(struct pstat*); // p2b - scheduler
 int             growproc(int);

@@ -1,10 +1,11 @@
 /*
  * Revisions:
- * GJE p1b - add getppid system call
- *         - add getreadcount system call
- * GJE p2b - add getpinfo and settickets system calls
- *         - add yield syscall
- * GJE p3b - add mprotect and munprotect system calls
+ *   GJE p1b - add getppid system call
+ *           - add getreadcount system call
+ *   GJE p2b - add getpinfo and settickets system calls
+ *           - add yield system call
+ *   GJE p3b - add mprotect and munprotect system calls
+ *   GJE p4b - add clone system call
  */
 
 struct stat;
@@ -40,6 +41,7 @@ int getpinfo(struct pstat*);
 int yield(void);
 int mprotect(void*, int);
 int munprotect(void*, int);
+int clone(void (*fcn)(void*, void*), void* arg1, void* arg2, void* stack);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -1,6 +1,7 @@
 /*
  * @revisions
  *   GJE p2b - Implement lottery scheduler
+ *   GJE p4b - Add clone()
  */
 
 #include "types.h"
@@ -327,6 +328,74 @@ wait(void)
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
+}
+
+/*
+ * Creates a new process sharing the same address space as the calling process.
+ * @param fcn Pointer to function to execute
+ * @param arg1 First argument passed to fcn
+ * @param arg2 Second argument passed to fcn
+ * @param stack User stack for the new process.
+ *              One page in size and page aligned.
+ * @returns the pid of the newly created thread if successful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int clone(void (*fcn)(void*, void*), void* arg1, void* arg2, void* stack)
+{
+	int i;
+  	int pid;
+  	struct proc *np;
+  	struct proc *curproc = myproc();
+  	uint ustack[CLONE_NARGS];
+  	uint sp = (uint)stack + PGSIZE;
+
+  	// Allocate process.
+  	if((np = allocproc()) == 0){
+  	  return -1;
+  	}
+
+  	// push arguments to stack
+  	ustack[0] = 0xffffffff;// fake return PC
+  	ustack[1] = (uint)arg1;
+  	ustack[2] = (uint)arg2;
+
+  	sp -= sizeof(ustack);
+  	if (copyout(curproc->pgdir, sp, ustack, sizeof(ustack)) < 0)
+  	{
+		return -1;
+	}
+
+  	// point to SAME address space as current porc
+  	np->pgdir = curproc->pgdir;
+
+  	np->sz = curproc->sz;
+  	np->parent = curproc;
+  	*np->tf = *curproc->tf;
+  	np->tickets = curproc->tickets;
+  	np->ticks = 0;
+
+  	// setup new user stack and registers
+  	np->tf->eip = (uint)fcn;
+  	np->tf->esp = sp;
+  	np->tf->ebp = sp;
+
+  	for(i = 0; i < NOFILE; i++)
+  	  if(curproc->ofile[i])
+  	    np->ofile[i] = filedup(curproc->ofile[i]);
+  	np->cwd = idup(curproc->cwd);
+
+  	safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  	pid = np->pid;
+
+  	acquire(&ptable.lock);
+
+  	np->state = RUNNABLE;
+
+  	release(&ptable.lock);
+
+  	return pid;
 }
 
 //PAGEBREAK: 42

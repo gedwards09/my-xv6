@@ -15,8 +15,8 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
+	_test_clone\
 	_test_fork\
-	_test_null\
 	_test_pid\
 	_test_ppid\
 	_user_hello\

@@ -7,6 +7,7 @@
  *           - add yield syscall
  *   GJE p3b - add mprotect syscall
  *           - add munprotect syscall
+ *   GJE p4b - add clone syscall
  */
 
 #include "syscall.h"
@@ -47,3 +48,4 @@ SYSCALL(getpinfo)
 SYSCALL(yield)
 SYSCALL(mprotect)
 SYSCALL(munprotect)
+SYSCALL(clone)
