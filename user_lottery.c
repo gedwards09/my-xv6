@@ -22,14 +22,14 @@ int main(int argc, char** argv)
 {
 	if (argc != 2)
 	{
-		printf(1, "lottery.c:usage \"lottery spins\"\n");
+		printf(1, "user_lottery.c:usage \"user_lottery spins\"\n");
 		exit();
 	}
 
 	struct pstat pstat;
 	
 	char* pargv[3];
-	pargv[0] = "spin";
+	pargv[0] = "user_spin";
 	pargv[1] = argv[1];
 	pargv[2] = 0;
 
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 		if (pid[i] == 0)
 		{
 			settickets(tickets[i]);
-			exec("spin", pargv);
+			exec("user_spin", pargv);
 			exit();
 		}
 	}
