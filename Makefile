@@ -17,6 +17,7 @@ UPROGS=\
 	_zombie\
 	_test_fork\
 	_test_threads\
+	_test_threads1\
 	_user_hello\
 	_user_lottery\
 	_user_spin\
