@@ -160,11 +160,9 @@ void lock_init(lock_t* plock)
  * @revisions
  *   GJE p4b - Created. Implementation: OSTEP, Arpaci-Dusseau.
  */
-void lock_aquire(lock_t* plock)
+void lock_acquire(lock_t* plock)
 {
-	plock->ticket++;
-	int myturn = plock->ticket;
-	// fetch_and_add(&plock->ticket, 1);
+	int myturn = fetch_and_add(&plock->ticket, 1);
 	while (plock->turn != myturn)
 	{
 		yield();

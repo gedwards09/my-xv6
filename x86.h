@@ -1,6 +1,6 @@
 /*
  * @revisisons
- * GJE p4b - add atomic fetch_and_add instruction
+ *   GJE p4b - add atomic fetch_and_add instruction
  */
 
 // Routines to let C code use special x86 instructions.
@@ -157,16 +157,14 @@ lcr3(uint val)
  * @revisions
  *   GJE p4b - Created. Implementation: en.wikipedia.org/wiki/Fetch-and-add
  */
- /*
 static inline int fetch_and_add(int* pvariable, int value)
 {
 	asm volatile("lock; xaddl %0, %1"
 		: "+r" (value), "+m" (*pvariable)
 		:
 		: "memory");
-	return *pvariable;
+	return value;
 }
-*/
 
 //PAGEBREAK: 36
 // Layout of the trap frame built on the stack by the
