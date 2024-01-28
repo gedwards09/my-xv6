@@ -172,7 +172,7 @@ vectors.S: vectors.pl
 
 ULDFLAGS += -nostdlib --omagic --entry=main --section-start=.text=0x1000
 
-ULIB = ulib.o usys.o printf.o umalloc.o rand.o
+ULIB = ulib.o usys.o printf.o umalloc.o uthread.o rand.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) $(ULDFLAGS) -N -e main -Ttext 0x1000 -o $@ $^

@@ -4,6 +4,7 @@
  *   GJE p3b - add clearptew
  *           - add permitptew
  *   GJE p4b - add clone
+ *           - add join
  */
 
 struct buf;
@@ -117,6 +118,7 @@ void            exit(void);
 int             fork(void);
 int				clone(void (*fcn)(void*, void*), void* arg1, 
 					  void* arg2, void* stack); // p4b - kernel threads
+int             join(void** stack);
 struct proc*    getLotteryWinner(void);
 int             getpinfo(struct pstat*); // p2b - scheduler
 int             growproc(int);

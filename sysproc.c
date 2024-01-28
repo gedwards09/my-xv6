@@ -7,6 +7,7 @@
  *   GJE p3b - add sys_mprotect syscall
  *           - add sys_munprotect syscall
  *   GJE p4b - add sys_clone syscall
+ *           - add sys_join syscall
  */
 
 #include "types.h"
@@ -43,6 +44,23 @@ int sys_clone(void)
 
 	return clone((void(*)(void*,void*))ufcn, (void*)uarg1, 
 				 (void*)uarg2, (void*)ustack);
+}
+
+/*
+ * Fetch arguments from the stack and pass to join()
+ * @returns pid of exited thread if sucessful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int sys_join(void)
+{
+	uint ustack;
+	if (argint(0, (int*)&ustack) < 0)
+	{
+		return -1;
+	}
+
+	return join((void**)ustack);
 }
 
 int
