@@ -1,5 +1,5 @@
 /*
- * Test routine for clone() system call
+ * Test routine for thread and lock libraries
  *
  * @author Greg Edwards
  * @version 1.0

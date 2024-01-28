@@ -3,6 +3,8 @@
  *   GJE p2b - implement lottery scheduler
  *   GJE p4b - add clone()
  *           - add join()
+ *           - only wait() for processes with separate address space
+ *           - grow all threads sharing address space when increasing one
  */
 
 #include "types.h"
@@ -169,23 +171,36 @@ userinit(void)
 
 // Grow current process's memory by n bytes.
 // Return 0 on success, -1 on failure.
+/*
+ * @revisions
+ *   GJE p4b - Increase size of all threads sharing address space when 
+ *             increasing one
+ */
 int
 growproc(int n)
 {
-  uint sz;
-  struct proc *curproc = myproc();
+	uint sz;
+  	struct proc *curproc = myproc();
+ 	struct proc *p;
 
-  sz = curproc->sz;
-  if(n > 0){
-    if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
-      return -1;
-  } else if(n < 0){
-    if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
-      return -1;
-  }
-  curproc->sz = sz;
-  switchuvm(curproc);
-  return 0;
+  	sz = curproc->sz;
+  	if(n > 0){
+  	  if((sz = allocuvm(curproc->pgdir, sz, sz + n)) == 0)
+  	    return -1;
+  	} else if(n < 0){
+  	  if((sz = deallocuvm(curproc->pgdir, sz, sz + n)) == 0)
+  	    return -1;
+  	}
+	curproc->sz = sz;
+  	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  	{
+  		if (p->pgdir == curproc->pgdir)
+  	  	{
+  	  		p->sz = sz;
+  	  	}
+  	}
+  	switchuvm(curproc);
+  	return 0;
 }
 
 // Create a new process copying p as the parent.
@@ -243,7 +258,7 @@ fork(void)
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
-// until its parent calls wait() to find out it exited.
+// until its parent calls wait() or join() to find out it exited.
 void
 exit(void)
 {
@@ -269,7 +284,7 @@ exit(void)
 
   acquire(&ptable.lock);
 
-  // Parent might be sleeping in wait().
+  // Parent might be sleeping in wait() or join().
   wakeup1(curproc->parent);
 
   // Pass abandoned children to init.
@@ -289,6 +304,10 @@ exit(void)
 
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
+/*
+ * @revisions
+ *   GJE p4b - Only wait for processes with separate address space.
+ */
 int
 wait(void)
 {
@@ -301,7 +320,7 @@ wait(void)
     // Scan through table looking for exited children.
     havekids = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->parent != curproc)
+      if(p->parent != curproc || p->pgdir == curproc->pgdir)
         continue;
       havekids = 1;
       if(p->state == ZOMBIE){
@@ -377,9 +396,10 @@ int clone(void (*fcn)(void*, void*), void* arg1, void* arg2, void* stack)
   	np->ticks = 0;
 
   	// setup new user stack and registers
+	np->tf->eax = 0; // clear eax so 0 returned to child
+  	np->tf->ebp = (uint)stack;
   	np->tf->eip = (uint)fcn;
   	np->tf->esp = sp;
-  	np->tf->ebp = (uint)stack;
 
   	for(i = 0; i < NOFILE; i++)
   	  if(curproc->ofile[i])
