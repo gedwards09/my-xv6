@@ -9,7 +9,6 @@
 
 #include "types.h"
 #include "user.h"
-#include "uthread.h"
 
 #define STACK_SIZE (4096)
 #define INC_TIMES (1000000)
