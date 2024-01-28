@@ -16,9 +16,7 @@ UPROGS=\
 	_wc\
 	_zombie\
 	_test_fork\
-	_test_null\
-	_test_pid\
-	_test_ppid\
+	_test_threads\
 	_user_hello\
 	_user_lottery\
 	_user_spin\
@@ -172,7 +170,7 @@ vectors.S: vectors.pl
 
 ULDFLAGS += -nostdlib --omagic --entry=main --section-start=.text=0x1000
 
-ULIB = ulib.o usys.o printf.o umalloc.o rand.o
+ULIB = umalloc.o ulib.o usys.o printf.o rand.o
 
 _%: %.o $(ULIB)
 	$(LD) $(LDFLAGS) $(ULDFLAGS) -N -e main -Ttext 0x1000 -o $@ $^
@@ -182,7 +180,7 @@ _%: %.o $(ULIB)
 _forktest: forktest.o $(ULIB)
 	# forktest has less library code linked in - needs to be small
 	# in order to be able to max out the proc table.
-	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _forktest forktest.o ulib.o usys.o
+	$(LD) $(LDFLAGS) -N -e main -Ttext 0 -o _forktest forktest.o ulib.o usys.o umalloc.o
 	$(OBJDUMP) -S _forktest > forktest.asm
 
 mkfs: mkfs.c fs.h

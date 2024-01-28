@@ -1,7 +1,10 @@
 /*
  * @revisions
  *   GJE p2b - add tickets count to process state
+ *   GJE p4b - add CLONE_NARGS parameter
  */
+
+#define CLONE_NARGS (3)
 
 // Per-CPU state
 struct cpu {

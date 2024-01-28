@@ -1,3 +1,8 @@
+/*
+ * @revisisons
+ *   GJE p4b - add atomic fetch_and_add instruction
+ */
+
 // Routines to let C code use special x86 instructions.
 
 static inline uchar
@@ -142,6 +147,23 @@ static inline void
 lcr3(uint val)
 {
   asm volatile("movl %0,%%cr3" : : "r" (val));
+}
+
+/*
+ * Atomic fetch and add instruction for x86 gcc compiler
+ * @param pvariable pointer to variable to add value to
+ * @param value the value to add
+ * @returns the value of variable after addition
+ * @revisions
+ *   GJE p4b - Created. Implementation: en.wikipedia.org/wiki/Fetch-and-add
+ */
+static inline int fetch_and_add(int* pvariable, int value)
+{
+	asm volatile("lock; xaddl %0, %1"
+		: "+r" (value), "+m" (*pvariable)
+		:
+		: "memory");
+	return value;
 }
 
 //PAGEBREAK: 36

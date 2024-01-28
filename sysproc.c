@@ -6,6 +6,8 @@
  *           - add sys_yield syscall
  *   GJE p3b - add sys_mprotect syscall
  *           - add sys_munprotect syscall
+ *   GJE p4b - add sys_clone syscall
+ *           - add sys_join syscall
  */
 
 #include "types.h"
@@ -22,6 +24,43 @@ int
 sys_fork(void)
 {
   return fork();
+}
+
+/*
+ * Fetch arguments from the stack and pass to clone()
+ * @returns pid of the created process if successful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int sys_clone(void)
+{
+	uint ufcn, uarg1, uarg2, ustack;
+
+	if (argint(0, (int*)&ufcn) < 0 || argint(1, (int*)&uarg1) < 0
+		|| argint(2, (int*)&uarg2) < 0 || argint(3, (int*)&ustack) < 0)
+	{
+		return -1;
+	}
+
+	return clone((void(*)(void*,void*))ufcn, (void*)uarg1, 
+				 (void*)uarg2, (void*)ustack);
+}
+
+/*
+ * Fetch arguments from the stack and pass to join()
+ * @returns pid of exited thread if sucessful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int sys_join(void)
+{
+	uint ustack;
+	if (argint(0, (int*)&ustack) < 0)
+	{
+		return -1;
+	}
+
+	return join((void**)ustack);
 }
 
 int
@@ -57,7 +96,7 @@ sys_getpid(void)
  * System call to get PID of parent 
  * @returns PID of parent process
  * @revisions
- * GJE p1b - created
+ *   GJE p1b - created
  */
 int sys_getppid(void)
 {
@@ -137,19 +176,19 @@ int sys_settickets(void)
  */
 int sys_getpinfo(void)
 {
-	char* p;
+	struct pstat* p;
 	
-	if (argptr(0, &p, sizeof(struct pstat)) < 0)
+	if (argptr(0, (void*)&p, sizeof(struct pstat)) < 0)
 	{
 		return -1;
 	}
-	return getpinfo((struct pstat*) p);
+	return getpinfo(p);
 }
 
 /*
  * Handle system call for process to yield
  * @returns 0
- * Revisions
+ * @revisions
  *   GJE p2b - Created
  */
 int sys_yield(void)

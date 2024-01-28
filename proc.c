@@ -1,6 +1,8 @@
 /*
  * @revisions
- *   GJE p2b - Implement lottery scheduler
+ *   GJE p2b - implement lottery scheduler
+ *   GJE p4b - add clone()
+ *           - add join()
  */
 
 #include "types.h"
@@ -326,6 +328,123 @@ wait(void)
 
     // Wait for children to exit.  (See wakeup1 call in proc_exit.)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
+  }
+}
+
+/*
+ * Creates a new process sharing the same address space as the calling process.
+ * @param fcn Pointer to function to execute
+ * @param arg1 First argument passed to fcn
+ * @param arg2 Second argument passed to fcn
+ * @param stack User stack for the new process.
+ *              One page in size and page aligned.
+ * @returns the pid of the newly created thread if successful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int clone(void (*fcn)(void*, void*), void* arg1, void* arg2, void* stack)
+{
+	int i;
+  	int pid;
+  	struct proc *np;
+  	struct proc *curproc = myproc();
+  	uint ustack[CLONE_NARGS];
+  	uint sp = (uint)stack + PGSIZE;
+
+  	// Allocate process.
+  	if((np = allocproc()) == 0){
+  	  return -1;
+  	}
+
+  	// push arguments to stack
+  	ustack[0] = 0xffffffff;// fake return PC
+  	ustack[1] = (uint)arg1;
+  	ustack[2] = (uint)arg2;
+
+  	sp -= sizeof(ustack);
+  	if (copyout(curproc->pgdir, sp, ustack, sizeof(ustack)) < 0)
+  	{
+		return -1;
+	}
+
+  	// point to SAME address space as current porc
+  	np->pgdir = curproc->pgdir;
+
+  	np->sz = curproc->sz;
+  	np->parent = curproc;
+  	*np->tf = *curproc->tf;
+  	np->tickets = curproc->tickets;
+  	np->ticks = 0;
+
+  	// setup new user stack and registers
+  	np->tf->eip = (uint)fcn;
+  	np->tf->esp = sp;
+  	np->tf->ebp = (uint)stack;
+
+  	for(i = 0; i < NOFILE; i++)
+  	  if(curproc->ofile[i])
+  	    np->ofile[i] = filedup(curproc->ofile[i]);
+  	np->cwd = idup(curproc->cwd);
+
+  	safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  	pid = np->pid;
+
+  	acquire(&ptable.lock);
+
+  	np->state = RUNNABLE;
+
+  	release(&ptable.lock);
+
+  	return pid;
+}
+
+/*
+ * Waits for thread sharing the same address space to exit.
+ * @param stack OUTPUT pointer to exited thread's user stack.
+ *                     Responsibility of the calling process to free.
+ * @returns pid of exited thread if successful, -1 otherwise
+ * @revisions
+ *   GJE p4b - Created
+ */
+int join(void** stack)
+{
+  struct proc *p;
+  int hasthreads, pid;
+  struct proc *curproc = myproc();
+  
+  acquire(&ptable.lock);
+  for(;;){
+    // Scan through table looking for exited threads
+    hasthreads = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->parent != curproc || p->pgdir != curproc->pgdir)
+        continue;
+      hasthreads = 1;
+      if(p->state == ZOMBIE){
+        // Found one.
+        pid = p->pid;
+		// 
+		*stack = (void*)PGROUNDDOWN(p->tf->esp);
+        kfree(p->kstack);
+        p->kstack = 0;
+        p->pid = 0;
+        p->parent = 0;
+        p->name[0] = 0;
+        p->killed = 0;
+        p->state = UNUSED;
+        release(&ptable.lock);
+        return pid;
+      }
+    }
+
+    // No point waiting if we don't have any threads.
+    if(!hasthreads || curproc->killed){
+      release(&ptable.lock);
+      return -1;
+    }
+
+    sleep(curproc, &ptable.lock);
   }
 }
 
